@@ -155,12 +155,22 @@ ipcMain.on('current-settings-response', (event, payload) => {
   }
 });
 
-
 // Verrouille/déverrouille le déplacement et le redimensionnement de la fenêtre principale
 ipcMain.on('set-locked', (event, locked) => {
   win.setMovable(!locked);
   win.setResizable(!locked);
   saveWindowState();
+});
+
+// Démarrage automatique avec Windows (activable/désactivable depuis les réglages)
+ipcMain.handle('get-startup', () => {
+  return app.getLoginItemSettings().openAtLogin;
+});
+ipcMain.on('set-startup', (event, enabled) => {
+  app.setLoginItemSettings({
+    openAtLogin: enabled,
+    path: process.execPath,
+  });
 });
 
 // Ajuste automatiquement la hauteur de la fenêtre principale selon le contenu affiché

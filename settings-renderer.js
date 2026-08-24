@@ -55,6 +55,17 @@ opacityRange.oninput = (e) => {
   ipcRenderer.send('settings-update', { type: 'opacity', value: val }); // mémorise
 };
 
+/* ---------- Démarrage automatique avec Windows ---------- */
+const startupCheckbox = document.getElementById('checkStartup');
+
+ipcRenderer.invoke('get-startup').then((isEnabled) => {
+  startupCheckbox.checked = isEnabled;
+});
+
+startupCheckbox.addEventListener('change', () => {
+  ipcRenderer.send('set-startup', startupCheckbox.checked);
+});
+
 /* ---------- Couleurs ---------- */
 accentInput.addEventListener('input', () => {
   applyLocalColors(accentInput.value, bgInput.value);
