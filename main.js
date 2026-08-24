@@ -159,6 +159,9 @@ ipcMain.on('minimize-app', () => win.minimize());
 ipcMain.on('open-settings', () => createSettingsWindow());
 ipcMain.on('close-settings', () => { if (settingsWin) settingsWin.close(); });
 
+// Numéro de version actuel du widget (affiché dans les réglages)
+ipcMain.handle('get-app-version', () => app.getVersion());
+
 // Opacité de la fenêtre principale (pilotée depuis les réglages)
 ipcMain.on('set-opacity', (event, value) => {
   win.setOpacity(value);

@@ -4,6 +4,11 @@ const { ipcRenderer } = require('electron');
 // Ferme directement CETTE fenêtre (pas besoin de repasser par le processus principal)
 document.getElementById('btnCloseSettings').onclick = () => window.close();
 
+/* ---------- Numéro de version du widget ---------- */
+ipcRenderer.invoke('get-app-version').then((version) => {
+  document.getElementById('versionLabel').textContent = `Version ${version}`;
+});
+
 /* ---------- Récupération de l'état actuel depuis la fenêtre principale ---------- */
 // Les deux fenêtres ne partagent pas leur stockage local : on demande donc à la
 // fenêtre principale de nous envoyer ses valeurs actuelles pour préremplir les champs.
