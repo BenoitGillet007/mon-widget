@@ -116,6 +116,37 @@ app.whenReady().then(() => {
   }
 });
 
+// Informe visuellement la fenêtre principale de l'avancement de la mise à jour
+function notifyUpdateStatus(status, message) {
+  if (win && !win.isDestroyed()) {
+    win.webContents.send('update-status', { status, message });
+  }
+}
+
+autoUpdater.on('checking-for-update', () => {
+  notifyUpdateStatus('checking', 'Vérification des mises à jour…');
+});
+autoUpdater.on('update-available', (info) => {
+  notifyUpdateStatus('available', `Mise à jour ${info.version} trouvée, téléchargement…`);
+});
+autoUpdater.on('update-not-available', () => {
+  notifyUpdateStatus('up-to-date', 'Widget à jour');
+});
+autoUpdater.on('download-progress', (progress) => {
+  notifyUpdateStatus('downloading', `Téléchargement… ${Math.round(progress.percent)}%`);
+});
+autoUpdater.on('update-downloaded', (info) => {
+  notifyUpdateStatus('ready', `Mise à jour ${info.version} prête`);
+});
+autoUpdater.on('error', (err) => {
+  notifyUpdateStatus('error', 'Erreur de mise à jour');
+});
+
+// Redémarre l'application pour installer la mise à jour téléchargée
+ipcMain.on('install-update', () => {
+  autoUpdater.quitAndInstall();
+});
+
 app.on('window-all-closed', () => {
   app.quit();
 });

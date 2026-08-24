@@ -181,6 +181,32 @@ html, body {
   font-weight: 600;
 }
 
+/* Bandeau de statut de mise à jour */
+.update-banner {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 14px 12px;
+  padding: 6px 10px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 8px;
+  font-size: 11px;
+  opacity: 0.9;
+}
+.update-banner.visible { display: flex; }
+.update-banner button {
+  -webkit-app-region: no-drag;
+  background: var(--accent);
+  border: none;
+  color: white;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
 /* Fenêtre réglages (fenêtre Electron indépendante, taille fixe qui lui est propre) */
 .settings-window {
   width: 100vw;

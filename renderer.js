@@ -227,6 +227,46 @@ if (!isNaN(savedOpacity)) {
   ipcRenderer.send('set-opacity', savedOpacity);
 }
 
+/* ---------- Statut des mises à jour automatiques ---------- */
+const updateBanner = document.getElementById('updateBanner');
+const updateMessage = document.getElementById('updateMessage');
+const updateRestartBtn = document.getElementById('updateRestartBtn');
+
+function showUpdateBanner(text, showRestart = false) {
+  updateMessage.textContent = text;
+  updateRestartBtn.style.display = showRestart ? 'inline-block' : 'none';
+  updateBanner.classList.add('visible');
+  measureAndResize();
+}
+
+function hideUpdateBanner() {
+  updateBanner.classList.remove('visible');
+  measureAndResize();
+}
+
+ipcRenderer.on('update-status', (event, { status, message }) => {
+  switch (status) {
+    case 'checking':
+    case 'available':
+    case 'downloading':
+      showUpdateBanner(message);
+      break;
+    case 'ready':
+      showUpdateBanner(message, true); // affiche le bouton "Redémarrer"
+      break;
+    case 'up-to-date':
+      showUpdateBanner(message);
+      setTimeout(hideUpdateBanner, 4000); // disparaît tout seul après 4s
+      break;
+    case 'error':
+      showUpdateBanner(message);
+      setTimeout(hideUpdateBanner, 5000);
+      break;
+  }
+});
+
+updateRestartBtn.onclick = () => ipcRenderer.send('install-update');
+
 /* ---------- Synchronisation avec la fenêtre réglages ---------- */
 // La fenêtre réglages envoie ses changements via IPC (relayés par main.js) :
 // on les applique ici dès qu'ils arrivent, et on les mémorise dans NOTRE stockage local.
