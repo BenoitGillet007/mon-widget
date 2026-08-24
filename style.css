@@ -1,0 +1,268 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  user-select: none;
+}
+
+:root {
+  --accent: #6c8cff;
+  --bg-color: 25, 28, 38; /* triplet R, G, B utilisé dans rgba() */
+}
+
+html, body {
+  background: transparent;
+  overflow: hidden;
+}
+
+.widget {
+  width: 100vw;
+  background: rgba(var(--bg-color), 0.72);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #f0f0f5;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+/* Barre du haut, déplaçable */
+.titlebar {
+  -webkit-app-region: drag;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  background: rgba(255,255,255,0.03);
+}
+
+.titlebar .dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.titlebar-buttons {
+  -webkit-app-region: no-drag;
+  display: flex;
+  gap: 4px;
+}
+
+.titlebar-buttons button {
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 14px;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.titlebar-buttons button:hover {
+  background: rgba(255,255,255,0.12);
+}
+#btnClose:hover {
+  background: #e5484d;
+  color: white;
+}
+#btnLock.active {
+  background: var(--accent);
+  color: white;
+}
+
+/* Horloge */
+.clock-section {
+  text-align: center;
+  padding: 14px 0 6px;
+}
+#clock {
+  font-size: 34px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+#date {
+  font-size: 13px;
+  opacity: 0.7;
+  text-transform: capitalize;
+  margin-top: 2px;
+}
+
+/* Météo */
+.weather-section {
+  margin: 10px 14px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+}
+.weather-loading { opacity: 0.6; font-style: italic; }
+.weather-temp { font-size: 22px; font-weight: 600; }
+.weather-city { font-size: 12px; opacity: 0.75; }
+.weather-icon { font-size: 26px; }
+
+/* Onglets */
+.tabs {
+  display: flex;
+  margin: 6px 14px 0;
+  gap: 4px;
+}
+.tab-btn {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  border: none;
+  color: #ccc;
+  padding: 6px 0;
+  font-size: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.tab-btn.active {
+  background: var(--accent);
+  color: white;
+}
+
+.tab-content {
+  display: none;
+  height: 190px;
+  margin: 10px 14px 14px;
+  overflow: auto;
+}
+.tab-content.active { display: flex; flex-direction: column; }
+
+#notesArea {
+  flex: 1;
+  resize: none;
+  background: rgba(255,255,255,0.06);
+  border: none;
+  border-radius: 10px;
+  color: #f0f0f5;
+  padding: 8px;
+  font-size: 13px;
+}
+#notesArea:focus { outline: 1px solid var(--accent); }
+
+/* Calendrier */
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+.calendar-header button {
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 16px;
+  cursor: pointer;
+}
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+  font-size: 11px;
+  text-align: center;
+}
+.calendar-grid div {
+  padding: 4px 0;
+  border-radius: 6px;
+}
+.day-name { opacity: 0.5; font-weight: 600; }
+.day-cell:hover { background: rgba(255,255,255,0.08); }
+.today {
+  background: var(--accent);
+  color: white;
+  font-weight: 600;
+}
+
+/* Fenêtre réglages (fenêtre Electron indépendante, taille fixe qui lui est propre) */
+.settings-window {
+  width: 100vw;
+  min-height: 100vh;
+  background: rgba(var(--bg-color), 0.9);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #f0f0f5;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  overflow: hidden;
+}
+
+.settings-title {
+  -webkit-app-region: drag;
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.settings-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+}
+.settings-body label {
+  font-size: 13px;
+  opacity: 0.85;
+  margin-top: 4px;
+}
+.settings-body input[type="text"] {
+  padding: 6px;
+  border-radius: 6px;
+  border: none;
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+.settings-body button {
+  padding: 8px;
+  border-radius: 6px;
+  border: none;
+  background: var(--accent);
+  color: white;
+  cursor: pointer;
+}
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+.check-row input { -webkit-app-region: no-drag; }
+.check-row label { user-select: none; margin-top: 0; }
+
+.color-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 13px;
+}
+.color-row input[type="color"] {
+  -webkit-app-region: no-drag;
+  width: 36px;
+  height: 24px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.secondary-btn {
+  background: rgba(255,255,255,0.08) !important;
+  color: #ccc !important;
+  font-size: 12px;
+}
+.secondary-btn:hover {
+  background: rgba(255,255,255,0.16) !important;
+}

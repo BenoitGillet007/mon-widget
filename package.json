@@ -1,0 +1,40 @@
+{
+  "name": "mon-widget-bureau",
+  "version": "1.0.0",
+  "description": "Petit widget de bureau : heure, date, météo, notes, calendrier",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win nsis",
+    "publish": "electron-builder --win nsis --publish always"
+  },
+  "author": "Toi",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.0"
+  },
+  "build": {
+    "appId": "com.toi.monwidget",
+    "productName": "Mon Widget",
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "perMachine": false
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "TON-PSEUDO-GITHUB",
+        "repo": "mon-widget"
+      }
+    ]
+  }
+}

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>Réglages</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="settings-window">
+
+    <!-- Barre du haut : zone pour déplacer la fenêtre + bouton fermer -->
+    <div class="titlebar" id="dragRegion">
+      <span class="dot"></span>
+      <span class="settings-title">Réglages</span>
+      <div class="titlebar-buttons">
+        <button id="btnCloseSettings" title="Fermer">×</button>
+      </div>
+    </div>
+
+    <div class="settings-body">
+
+      <label>Ville pour la météo :</label>
+      <input type="text" id="cityInput" placeholder="Ex: Lierneux, Belgique" />
+      <button id="saveCity">Enregistrer</button>
+
+      <label>Opacité de la fenêtre info :</label>
+      <input type="range" id="opacityRange" min="0.3" max="1" step="0.05" value="1" />
+
+      <label>Couleurs du widget :</label>
+      <div class="color-row">
+        <span>Accent (boutons, surlignages)</span>
+        <input type="color" id="accentColor" value="#6c8cff" />
+      </div>
+      <div class="color-row">
+        <span>Fond du widget</span>
+        <input type="color" id="bgColor" value="#191c26" />
+      </div>
+      <button id="resetColors" class="secondary-btn">↺ Couleurs d'origine</button>
+
+      <label>Sections affichées :</label>
+      <div class="check-row"><input type="checkbox" id="checkClock" checked><label for="checkClock">Heure</label></div>
+      <div class="check-row"><input type="checkbox" id="checkDate" checked><label for="checkDate">Date</label></div>
+      <div class="check-row"><input type="checkbox" id="checkWeather" checked><label for="checkWeather">Météo</label></div>
+      <div class="check-row"><input type="checkbox" id="checkNotes" checked><label for="checkNotes">Notes</label></div>
+      <div class="check-row"><input type="checkbox" id="checkCalendar" checked><label for="checkCalendar">Calendrier</label></div>
+
+    </div>
+  </div>
+
+  <script src="settings-renderer.js"></script>
+</body>
+</html>

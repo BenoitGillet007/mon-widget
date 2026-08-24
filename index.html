@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<title>Mon Widget</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="widget">
+
+    <!-- Barre du haut : zone pour déplacer la fenêtre + boutons -->
+    <div class="titlebar" id="dragRegion">
+      <span class="dot"></span>
+      <div class="titlebar-buttons">
+        <button id="btnLock" title="Figer la position">🔓</button>
+        <button id="btnSettings" title="Réglages">⚙</button>
+        <button id="btnMinimize" title="Réduire">–</button>
+        <button id="btnClose" title="Fermer">×</button>
+      </div>
+    </div>
+
+    <!-- Horloge -->
+    <div class="clock-section">
+      <div id="clock">--:--:--</div>
+      <div id="date">--</div>
+    </div>
+
+    <!-- Météo -->
+    <div class="weather-section" id="weatherBox">
+      <div class="weather-loading">Chargement météo…</div>
+    </div>
+
+    <!-- Onglets : Notes / Calendrier -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="notes">📝 Notes</button>
+      <button class="tab-btn" data-tab="calendar">📅 Calendrier</button>
+    </div>
+
+    <div class="tab-content active" id="tab-notes">
+      <textarea id="notesArea" placeholder="Écris tes notes ici..."></textarea>
+    </div>
+
+    <div class="tab-content" id="tab-calendar">
+      <div class="calendar-header">
+        <button id="prevMonth">‹</button>
+        <span id="calendarTitle"></span>
+        <button id="nextMonth">›</button>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </div>
+
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
