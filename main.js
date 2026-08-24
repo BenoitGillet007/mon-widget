@@ -155,6 +155,7 @@ ipcMain.on('current-settings-response', (event, payload) => {
   }
 });
 
+
 // Verrouille/déverrouille le déplacement et le redimensionnement de la fenêtre principale
 ipcMain.on('set-locked', (event, locked) => {
   win.setMovable(!locked);
