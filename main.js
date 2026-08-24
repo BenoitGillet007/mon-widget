@@ -6,6 +6,16 @@ const { autoUpdater } = require('electron-updater');
 let win;          // la fenêtre principale (infos)
 let settingsWin;  // la fenêtre réglages (indépendante, créée à la demande)
 
+// Fichier de journal pour diagnostiquer le système de mise à jour automatique
+const updateLogPath = path.join(app.getPath('userData'), 'update-log.txt');
+function logUpdate(message) {
+  try {
+    fs.appendFileSync(updateLogPath, `[${new Date().toISOString()}] ${message}\n`);
+  } catch (err) {
+    // pas grave si l'écriture du log échoue
+  }
+}
+
 // Fichier où l'on sauvegarde la position/taille de la fenêtre entre les lancements
 const statePath = path.join(app.getPath('userData'), 'window-state.json');
 
@@ -109,10 +119,13 @@ app.whenReady().then(() => {
 
   // Vérifie automatiquement les mises à jour au démarrage.
   // Ne fonctionne que sur une version installée (pas en "npm start" pendant le développement).
+  logUpdate(`Démarrage. app.isPackaged=${app.isPackaged}. Version actuelle=${app.getVersion()}`);
   if (app.isPackaged) {
     autoUpdater.checkForUpdatesAndNotify();
     // Revérifie ensuite toutes les 4 heures, au cas où le widget reste ouvert longtemps
     setInterval(() => autoUpdater.checkForUpdatesAndNotify(), 4 * 60 * 60 * 1000);
+  } else {
+    logUpdate('Mode développement (non packagé) : vérification des mises à jour ignorée.');
   }
 });
 
@@ -124,21 +137,26 @@ function notifyUpdateStatus(status, message) {
 }
 
 autoUpdater.on('checking-for-update', () => {
+  logUpdate('checking-for-update');
   notifyUpdateStatus('checking', 'Vérification des mises à jour…');
 });
 autoUpdater.on('update-available', (info) => {
+  logUpdate(`update-available: version=${info.version}`);
   notifyUpdateStatus('available', `Mise à jour ${info.version} trouvée, téléchargement…`);
 });
-autoUpdater.on('update-not-available', () => {
+autoUpdater.on('update-not-available', (info) => {
+  logUpdate(`update-not-available: version distante=${info && info.version}`);
   notifyUpdateStatus('up-to-date', 'Widget à jour');
 });
 autoUpdater.on('download-progress', (progress) => {
   notifyUpdateStatus('downloading', `Téléchargement… ${Math.round(progress.percent)}%`);
 });
 autoUpdater.on('update-downloaded', (info) => {
+  logUpdate(`update-downloaded: version=${info.version}`);
   notifyUpdateStatus('ready', `Mise à jour ${info.version} prête`);
 });
 autoUpdater.on('error', (err) => {
+  logUpdate(`ERREUR: ${err && err.message ? err.message : err}`);
   notifyUpdateStatus('error', 'Erreur de mise à jour');
 });
 
