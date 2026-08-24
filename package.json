@@ -1,6 +1,6 @@
 {
   "name": "mon-widget-bureau",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Petit widget de bureau : heure, date, météo, notes, calendrier",
   "main": "main.js",
   "scripts": {
@@ -33,11 +33,9 @@
       {
         "provider": "github",
         "owner": "BenoitGillet007",
-        "repo": "mon-widget"
+        "repo": "mon-widget",
+        "draft": false
       }
     ]
-  },
-  "allowScripts": {
-    "electron@31.7.7": true
   }
 }
