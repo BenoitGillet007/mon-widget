@@ -55,8 +55,9 @@ function createWindow() {
     skipTaskbar: false,    // mets "true" si tu ne veux pas l'icône dans la barre des tâches
     icon: path.join(__dirname, 'assets', 'icon.png'),
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: false,   // la page n'a plus d'accès direct à Node.js
+      contextIsolation: true,   // la page ne peut utiliser que window.api (voir preload.js)
     },
   });
 
@@ -80,7 +81,22 @@ function createWindow() {
 
 // Icône dans la zone de notification (barre des tâches), avec menu clic droit
 function createTray() {
-  tray = new Tray(path.join(__dirname, 'assets', 'tray-icon.png'));
+  const trayIconPath = path.join(__dirname, 'assets', 'tray-icon.png');
+
+  if (!fs.existsSync(trayIconPath)) {
+    logUpdate(`ERREUR tray: fichier introuvable à ${trayIconPath}`);
+    console.error('Icône du tray introuvable :', trayIconPath);
+    return; // le widget continue de fonctionner normalement, juste sans icône de tray
+  }
+
+  try {
+    tray = new Tray(trayIconPath);
+  } catch (err) {
+    logUpdate(`ERREUR tray: ${err && err.message ? err.message : err}`);
+    console.error('Impossible de créer le tray :', err);
+    return;
+  }
+
   tray.setToolTip('Mon Widget');
 
   const contextMenu = Menu.buildFromTemplate([
@@ -145,8 +161,9 @@ function createSettingsWindow() {
     minHeight: 400,
     skipTaskbar: true,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: false,
+      contextIsolation: true,
     },
   });
 

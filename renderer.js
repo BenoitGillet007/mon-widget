@@ -1,4 +1,15 @@
-const { ipcRenderer } = require('electron');
+// Toutes les fonctionnalités système (fermer, redimensionner, alarmes, etc.) passent
+// par window.api, exposé par preload.js — cette page n'a plus aucun accès direct à
+// Node.js ni à Electron (voir la note de sécurité en tête de preload.js).
+
+// Neutralise tout code HTML/JS caché dans du texte externe (réponse d'API météo,
+// étiquette d'alarme tapée par l'utilisateur, etc.) avant de l'insérer dans la page.
+// Sans ça, du texte malveillant pourrait s'exécuter comme du vrai code.
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str == null ? '' : String(str);
+  return div.innerHTML;
+}
 
 /* ---------- Adaptation automatique de la hauteur de la fenêtre principale ---------- */
 // Mesure la hauteur réellement occupée par le contenu visible et demande
@@ -8,21 +19,21 @@ function measureAndResize() {
   requestAnimationFrame(() => {
     const widget = document.querySelector('.widget');
     const targetHeight = widget.scrollHeight;
-    ipcRenderer.send('resize-window', { height: targetHeight });
+    window.api.send('resize-window', { height: targetHeight });
   });
 }
 
 /* ---------- Boutons fenêtre ---------- */
-document.getElementById('btnClose').onclick = () => ipcRenderer.send('close-app');
-document.getElementById('btnMinimize').onclick = () => ipcRenderer.send('minimize-app');
-document.getElementById('btnSettings').onclick = () => ipcRenderer.send('open-settings');
+document.getElementById('btnClose').onclick = () => window.api.send('close-app');
+document.getElementById('btnMinimize').onclick = () => window.api.send('minimize-app');
+document.getElementById('btnSettings').onclick = () => window.api.send('open-settings');
 
 /* ---------- Verrouillage de la position ---------- */
 const btnLock = document.getElementById('btnLock');
 const dragRegion = document.getElementById('dragRegion');
 
 function applyLockState(locked) {
-  ipcRenderer.send('set-locked', locked);
+  window.api.send('set-locked', locked);
   btnLock.textContent = locked ? '🔒' : '🔓';
   btnLock.title = locked ? 'Débloquer la position' : 'Figer la position';
   btnLock.classList.toggle('active', locked);
@@ -191,13 +202,13 @@ function ringAlarm(alarm) {
   clearInterval(alarmBeepInterval);
   alarmBeepInterval = setInterval(() => sound.play(), sound.interval);
 
-  ipcRenderer.send('bring-to-front'); // ramène la fenêtre au premier plan même minimisée
+  window.api.send('bring-to-front'); // ramène la fenêtre au premier plan même minimisée
 }
 
 function stopRinging() {
   clearInterval(alarmBeepInterval);
   document.getElementById('alarmRingOverlay').classList.remove('active');
-  ipcRenderer.send('stop-flash');
+  window.api.send('stop-flash');
 }
 
 function updateClock() {
@@ -245,7 +256,7 @@ async function loadWeather() {
     weatherBox.innerHTML = `
       <div>
         <div class="weather-temp">${Math.round(cw.temperature)}°C</div>
-        <div class="weather-city">${name}, ${country}</div>
+        <div class="weather-city">${escapeHtml(name)}, ${escapeHtml(country)}</div>
       </div>
       <div style="text-align:right">
         <div class="weather-icon">${icon}</div>
@@ -363,8 +374,8 @@ function renderAlarmList() {
       row.innerHTML = `
         <input type="checkbox" class="alarm-enable" data-id="${alarm.id}" ${alarm.enabled ? 'checked' : ''} />
         <div class="alarm-info">
-          <div class="alarm-time">${icon} ${alarm.time}</div>
-          <div class="alarm-label">${alarm.label || ''}</div>
+          <div class="alarm-time">${icon} ${escapeHtml(alarm.time)}</div>
+          <div class="alarm-label">${escapeHtml(alarm.label || '')}</div>
         </div>
         <button class="alarm-delete" data-id="${alarm.id}">×</button>
       `;
@@ -464,7 +475,7 @@ applyColors();
 // Réapplique l'opacité sauvegardée au démarrage
 const savedOpacity = parseFloat(localStorage.getItem('opacity'));
 if (!isNaN(savedOpacity)) {
-  ipcRenderer.send('set-opacity', savedOpacity);
+  window.api.send('set-opacity', savedOpacity);
 }
 
 /* ---------- Statut des mises à jour automatiques ---------- */
@@ -484,7 +495,7 @@ function hideUpdateBanner() {
   measureAndResize();
 }
 
-ipcRenderer.on('update-status', (event, { status, message }) => {
+window.api.on('update-status', ({ status, message }) => {
   switch (status) {
     case 'checking':
     case 'available':
@@ -505,12 +516,12 @@ ipcRenderer.on('update-status', (event, { status, message }) => {
   }
 });
 
-updateRestartBtn.onclick = () => ipcRenderer.send('install-update');
+updateRestartBtn.onclick = () => window.api.send('install-update');
 
 /* ---------- Synchronisation avec la fenêtre réglages ---------- */
 // La fenêtre réglages envoie ses changements via IPC (relayés par main.js) :
 // on les applique ici dès qu'ils arrivent, et on les mémorise dans NOTRE stockage local.
-ipcRenderer.on('settings-update', (event, payload) => {
+window.api.on('settings-update', (payload) => {
   switch (payload.type) {
     case 'visibility':
       localStorage.setItem('visibility', JSON.stringify(payload.value));
@@ -537,8 +548,8 @@ ipcRenderer.on('settings-update', (event, payload) => {
 
 // Quand la fenêtre réglages s'ouvre, elle nous demande l'état actuel pour préremplir
 // correctement ses champs (ville, couleurs, sections affichées, opacité)
-ipcRenderer.on('send-current-settings', () => {
-  ipcRenderer.send('current-settings-response', {
+window.api.on('send-current-settings', () => {
+  window.api.send('current-settings-response', {
     visibility: loadVisibility(),
     city: localStorage.getItem('city') || 'Lierneux, Belgique',
     accentColor: localStorage.getItem('accentColor') || '#6c8cff',

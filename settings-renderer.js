@@ -1,11 +1,12 @@
-const { ipcRenderer } = require('electron');
+// Toutes les fonctionnalités système passent par window.api, exposé par preload.js —
+// cette page n'a plus aucun accès direct à Node.js ni à Electron.
 
 /* ---------- Fermeture de la fenêtre ---------- */
 // Ferme directement CETTE fenêtre (pas besoin de repasser par le processus principal)
 document.getElementById('btnCloseSettings').onclick = () => window.close();
 
 /* ---------- Numéro de version du widget ---------- */
-ipcRenderer.invoke('get-app-version').then((version) => {
+window.api.invoke('get-app-version').then((version) => {
   document.getElementById('versionLabel').textContent = `Version ${version}`;
 });
 
@@ -30,7 +31,7 @@ function applyLocalColors(accent, bg) {
   document.documentElement.style.setProperty('--bg-color', hexToRgbTriplet(bg));
 }
 
-ipcRenderer.on('current-settings-response', (event, state) => {
+window.api.on('current-settings-response', (state) => {
   cityInput.value = state.city;
   opacityRange.value = state.opacity;
   accentInput.value = state.accentColor;
@@ -46,40 +47,40 @@ ipcRenderer.on('current-settings-response', (event, state) => {
 });
 
 // Demande l'état actuel dès l'ouverture de la fenêtre
-ipcRenderer.send('request-current-settings');
+window.api.send('request-current-settings');
 
 /* ---------- Ville pour la météo ---------- */
 document.getElementById('saveCity').onclick = () => {
   const val = cityInput.value.trim();
-  if (val) ipcRenderer.send('settings-update', { type: 'city', value: val });
+  if (val) window.api.send('settings-update', { type: 'city', value: val });
 };
 
 /* ---------- Opacité de la fenêtre principale ---------- */
 opacityRange.oninput = (e) => {
   const val = parseFloat(e.target.value);
-  ipcRenderer.send('set-opacity', val);                              // applique tout de suite
-  ipcRenderer.send('settings-update', { type: 'opacity', value: val }); // mémorise
+  window.api.send('set-opacity', val);                              // applique tout de suite
+  window.api.send('settings-update', { type: 'opacity', value: val }); // mémorise
 };
 
 /* ---------- Démarrage automatique avec Windows ---------- */
 const startupCheckbox = document.getElementById('checkStartup');
 
-ipcRenderer.invoke('get-startup').then((isEnabled) => {
+window.api.invoke('get-startup').then((isEnabled) => {
   startupCheckbox.checked = isEnabled;
 });
 
 startupCheckbox.addEventListener('change', () => {
-  ipcRenderer.send('set-startup', startupCheckbox.checked);
+  window.api.send('set-startup', startupCheckbox.checked);
 });
 
 /* ---------- Couleurs ---------- */
 accentInput.addEventListener('input', () => {
   applyLocalColors(accentInput.value, bgInput.value);
-  ipcRenderer.send('settings-update', { type: 'accentColor', value: accentInput.value });
+  window.api.send('settings-update', { type: 'accentColor', value: accentInput.value });
 });
 bgInput.addEventListener('input', () => {
   applyLocalColors(accentInput.value, bgInput.value);
-  ipcRenderer.send('settings-update', { type: 'bgColor', value: bgInput.value });
+  window.api.send('settings-update', { type: 'bgColor', value: bgInput.value });
 });
 
 document.getElementById('resetColors').onclick = () => {
@@ -88,8 +89,8 @@ document.getElementById('resetColors').onclick = () => {
   accentInput.value = defaultAccent;
   bgInput.value = defaultBg;
   applyLocalColors(defaultAccent, defaultBg);
-  ipcRenderer.send('settings-update', { type: 'accentColor', value: defaultAccent });
-  ipcRenderer.send('settings-update', { type: 'bgColor', value: defaultBg });
+  window.api.send('settings-update', { type: 'accentColor', value: defaultAccent });
+  window.api.send('settings-update', { type: 'bgColor', value: defaultBg });
 };
 
 /* ---------- Sections affichées ---------- */
@@ -102,7 +103,7 @@ function sendVisibility() {
     calendar: document.getElementById('checkCalendar').checked,
     alarm: document.getElementById('checkAlarm').checked,
   };
-  ipcRenderer.send('settings-update', { type: 'visibility', value: v });
+  window.api.send('settings-update', { type: 'visibility', value: v });
 }
 
 ['checkClock', 'checkDate', 'checkWeather', 'checkNotes', 'checkCalendar', 'checkAlarm'].forEach(id => {
