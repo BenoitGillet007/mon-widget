@@ -272,12 +272,21 @@ loadWeather();
 setInterval(loadWeather, 15 * 60 * 1000); // rafraîchit toutes les 15 minutes
 
 /* ---------- Onglets ---------- */
+// Cliquer sur un onglet l'ouvre normalement. Cliquer une deuxième fois sur le
+// même onglet (déjà ouvert) le replie, pour libérer la place quand on n'en a plus besoin.
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.onclick = () => {
+    const wasAlreadyActive = btn.classList.contains('active');
+
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+
+    if (!wasAlreadyActive) {
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    }
+    // Si wasAlreadyActive est vrai, on ne remet rien "active" : l'onglet reste replié.
+
     measureAndResize(); // l'onglet Alarme n'a pas une hauteur fixe, contrairement aux autres
   };
 });
