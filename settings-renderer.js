@@ -42,6 +42,7 @@ ipcRenderer.on('current-settings-response', (event, state) => {
   document.getElementById('checkWeather').checked = state.visibility.weather;
   document.getElementById('checkNotes').checked = state.visibility.notes;
   document.getElementById('checkCalendar').checked = state.visibility.calendar;
+  document.getElementById('checkAlarm').checked = state.visibility.alarm;
 });
 
 // Demande l'état actuel dès l'ouverture de la fenêtre
@@ -99,10 +100,11 @@ function sendVisibility() {
     weather: document.getElementById('checkWeather').checked,
     notes: document.getElementById('checkNotes').checked,
     calendar: document.getElementById('checkCalendar').checked,
+    alarm: document.getElementById('checkAlarm').checked,
   };
   ipcRenderer.send('settings-update', { type: 'visibility', value: v });
 }
 
-['checkClock', 'checkDate', 'checkWeather', 'checkNotes', 'checkCalendar'].forEach(id => {
+['checkClock', 'checkDate', 'checkWeather', 'checkNotes', 'checkCalendar', 'checkAlarm'].forEach(id => {
   document.getElementById(id).addEventListener('change', sendVisibility);
 });

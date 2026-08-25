@@ -17,6 +17,7 @@ html, body {
 }
 
 .widget {
+  position: relative;
   width: 100vw;
   background: rgba(var(--bg-color), 0.72);
   backdrop-filter: blur(12px);
@@ -133,6 +134,13 @@ html, body {
   margin: 10px 14px 14px;
   overflow: auto;
 }
+
+/* L'onglet Alarme fait exception : il grandit avec le nombre d'alarmes
+   au lieu d'avoir une hauteur fixe (jusqu'à une limite raisonnable) */
+#tab-alarm.active {
+  height: auto;
+  max-height: 320px;
+}
 .tab-content.active { display: flex; flex-direction: column; }
 
 #notesArea {
@@ -178,6 +186,148 @@ html, body {
 .today {
   background: var(--accent);
   color: white;
+  font-weight: 600;
+}
+
+/* Alarme */
+.alarm-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.alarm-form-row {
+  display: flex;
+  gap: 4px;
+}
+.alarm-form input[type="time"],
+.alarm-form input[type="text"],
+.alarm-form select {
+  background: rgba(255,255,255,0.08);
+  border: none;
+  border-radius: 6px;
+  color: #f0f0f5;
+  padding: 5px 6px;
+  font-size: 12px;
+}
+.alarm-form input[type="time"] { flex: 0 0 auto; }
+.alarm-form input[type="text"] { flex: 1; min-width: 0; }
+.alarm-form select {
+  flex: 1;
+  min-width: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath fill='%23f0f0f5' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  background-size: 9px;
+  padding-right: 20px;
+}
+.alarm-form select option {
+  background: rgb(20, 22, 30);
+  color: #f0f0f5;
+}
+.alarm-form button {
+  background: var(--accent);
+  border: none;
+  color: white;
+  border-radius: 6px;
+  padding: 0 8px;
+  font-size: 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+#previewSoundBtn {
+  background: rgba(255,255,255,0.12);
+  width: 28px;
+}
+
+.alarm-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+}
+.alarm-empty {
+  opacity: 0.5;
+  font-size: 12px;
+  text-align: center;
+  padding: 12px 0;
+}
+.alarm-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+.alarm-info { flex: 1; min-width: 0; }
+.alarm-time { font-size: 15px; font-weight: 600; }
+.alarm-label {
+  font-size: 11px;
+  opacity: 0.65;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.alarm-delete {
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.alarm-delete:hover { color: #e5484d; }
+
+/* Écran de sonnerie, recouvre tout le widget */
+.alarm-ring-overlay {
+  display: none;
+  position: absolute;
+  inset: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--accent);
+  border-radius: 16px;
+  z-index: 30;
+  text-align: center;
+  padding: 16px;
+}
+.alarm-ring-overlay.active { display: flex; }
+.alarm-ring-icon {
+  font-size: 40px;
+  animation: alarm-pulse 1s infinite;
+}
+@keyframes alarm-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+.alarm-ring-text {
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+}
+.alarm-ring-buttons {
+  display: flex;
+  gap: 8px;
+}
+.alarm-ring-buttons button {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+#alarmSnoozeBtn {
+  background: rgba(255,255,255,0.25);
+  color: white;
+}
+#alarmStopBtn {
+  background: white;
+  color: #333;
   font-weight: 600;
 }
 

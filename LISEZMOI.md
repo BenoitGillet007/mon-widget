@@ -1,6 +1,6 @@
 # Mon Widget de bureau
 
-Un petit widget que tu peux placer n'importe où sur ton écran Windows : horloge, date, météo, notes et mini-calendrier.
+Un petit widget que tu peux placer n'importe où sur ton écran Windows : horloge, date, météo, notes, alarmes et mini-calendrier.
 
 ## 1. Installer les outils nécessaires (une seule fois)
 

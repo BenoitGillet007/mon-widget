@@ -16,7 +16,7 @@
         <button id="btnLock" title="Figer la position">🔓</button>
         <button id="btnSettings" title="Réglages">⚙</button>
         <button id="btnMinimize" title="Réduire">–</button>
-        <button id="btnClose" title="Fermer">×</button>
+        <button id="btnClose" title="Réduire dans la zone de notification">×</button>
       </div>
     </div>
 
@@ -31,10 +31,11 @@
       <div class="weather-loading">Chargement météo…</div>
     </div>
 
-    <!-- Onglets : Notes / Calendrier -->
+    <!-- Onglets : Notes / Calendrier / Alarme -->
     <div class="tabs">
       <button class="tab-btn active" data-tab="notes">📝 Notes</button>
       <button class="tab-btn" data-tab="calendar">📅 Calendrier</button>
+      <button class="tab-btn" data-tab="alarm">⏰ Alarme</button>
     </div>
 
     <div class="tab-content active" id="tab-notes">
@@ -50,10 +51,41 @@
       <div class="calendar-grid" id="calendarGrid"></div>
     </div>
 
+    <div class="tab-content" id="tab-alarm">
+      <div class="alarm-form">
+        <div class="alarm-form-row">
+          <input type="time" id="alarmTimeInput" />
+          <select id="alarmSoundInput">
+            <option value="classic">🔔 Classique</option>
+            <option value="soft">🎐 Douce</option>
+            <option value="urgent">🚨 Urgente</option>
+            <option value="siren">🚔 Sirène</option>
+            <option value="bell">🛎️ Cloche</option>
+          </select>
+          <button type="button" id="previewSoundBtn" title="Écouter">▶</button>
+        </div>
+        <div class="alarm-form-row">
+          <input type="text" id="alarmLabelInput" placeholder="Étiquette (optionnel)" />
+          <button id="addAlarmBtn">+ Ajouter</button>
+        </div>
+      </div>
+      <div class="alarm-list" id="alarmList"></div>
+    </div>
+
     <!-- Bandeau discret de statut de mise à jour (masqué par défaut) -->
     <div class="update-banner" id="updateBanner">
       <span id="updateMessage"></span>
       <button id="updateRestartBtn" style="display:none;">Redémarrer</button>
+    </div>
+
+    <!-- Écran plein widget affiché quand une alarme sonne -->
+    <div class="alarm-ring-overlay" id="alarmRingOverlay">
+      <div class="alarm-ring-icon">⏰</div>
+      <div class="alarm-ring-text" id="alarmRingText">Réveil</div>
+      <div class="alarm-ring-buttons">
+        <button id="alarmSnoozeBtn">+5 min</button>
+        <button id="alarmStopBtn">Arrêter</button>
+      </div>
     </div>
 
   </div>

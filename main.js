@@ -1,10 +1,12 @@
-const { app, BrowserWindow, ipcMain, Menu, screen } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, screen, Tray } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { autoUpdater } = require('electron-updater');
 
 let win;          // la fenêtre principale (infos)
 let settingsWin;  // la fenêtre réglages (indépendante, créée à la demande)
+let tray;         // icône dans la zone de notification (barre des tâches)
+let isQuitting = false; // devient true uniquement quand on choisit "Quitter" dans le tray
 
 // Fichier de journal pour diagnostiquer le système de mise à jour automatique
 const updateLogPath = path.join(app.getPath('userData'), 'update-log.txt');
@@ -48,7 +50,7 @@ function createWindow() {
     height: state.height,
     frame: false,          // pas de barre de titre Windows
     transparent: true,     // fond transparent -> on gère l'apparence en CSS
-    alwaysOnTop: true,     // toujours visible au-dessus des autres fenêtres
+    alwaysOnTop: false,    // sera activé automatiquement si la fenêtre est verrouillée (voir set-locked)
     resizable: true,
     skipTaskbar: false,    // mets "true" si tu ne veux pas l'icône dans la barre des tâches
     icon: path.join(__dirname, 'assets', 'icon.png'),
@@ -64,7 +66,45 @@ function createWindow() {
   // Sauvegarde la position/taille à chaque déplacement, redimensionnement, et fermeture
   win.on('moved', saveWindowState);
   win.on('resized', saveWindowState);
-  win.on('close', saveWindowState);
+
+  // Fermer la fenêtre (× ou Alt+F4) cache simplement le widget dans le tray,
+  // au lieu de quitter l'application. Seul le "Quitter" du menu du tray quitte vraiment.
+  win.on('close', (event) => {
+    saveWindowState();
+    if (!isQuitting) {
+      event.preventDefault();
+      win.hide();
+    }
+  });
+}
+
+// Icône dans la zone de notification (barre des tâches), avec menu clic droit
+function createTray() {
+  tray = new Tray(path.join(__dirname, 'assets', 'tray-icon.png'));
+  tray.setToolTip('Mon Widget');
+
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Afficher / Masquer', click: () => {
+        if (win.isVisible()) win.hide();
+        else { win.show(); win.focus(); }
+      },
+    },
+    { type: 'separator' },
+    {
+      label: 'Quitter', click: () => {
+        isQuitting = true;
+        app.quit();
+      },
+    },
+  ]);
+  tray.setContextMenu(contextMenu);
+
+  // Un simple clic (gauche) sur l'icône affiche/cache aussi le widget
+  tray.on('click', () => {
+    if (win.isVisible()) win.hide();
+    else { win.show(); win.focus(); }
+  });
 }
 
 // La fenêtre réglages a une taille fixe, indépendante de la fenêtre principale,
@@ -116,6 +156,7 @@ function createSettingsWindow() {
 
 app.whenReady().then(() => {
   createWindow();
+  createTray();
 
   // Vérifie automatiquement les mises à jour au démarrage.
   // Ne fonctionne que sur une version installée (pas en "npm start" pendant le développement).
@@ -165,12 +206,28 @@ ipcMain.on('install-update', () => {
   autoUpdater.quitAndInstall();
 });
 
-app.on('window-all-closed', () => {
-  app.quit();
+// Ramène la fenêtre principale au premier plan (utilisé quand une alarme sonne),
+// même si elle est minimisée ou cachée derrière d'autres fenêtres
+ipcMain.on('bring-to-front', () => {
+  if (!win || win.isDestroyed()) return;
+  if (win.isMinimized()) win.restore();
+  win.show();
+  win.focus();
+  win.flashFrame(true); // fait clignoter l'icône dans la barre des tâches
+});
+ipcMain.on('stop-flash', () => {
+  if (win && !win.isDestroyed()) win.flashFrame(false);
 });
 
-// Boutons de la fenêtre (fermer / réduire) pilotés depuis index.html
-ipcMain.on('close-app', () => app.quit());
+// L'application reste active dans le tray même si la fenêtre principale est cachée ;
+// elle ne se quitte que via "Quitter" dans le menu du tray (voir createTray).
+app.on('window-all-closed', () => {
+  if (isQuitting) app.quit();
+});
+
+// Boutons de la fenêtre (fermer / réduire) pilotés depuis index.html.
+// "Fermer" (×) cache simplement le widget dans le tray, ça ne quitte pas l'application.
+ipcMain.on('close-app', () => { if (win) win.hide(); });
 ipcMain.on('minimize-app', () => win.minimize());
 
 // Ouverture / fermeture de la fenêtre réglages (indépendante)
@@ -207,10 +264,13 @@ ipcMain.on('current-settings-response', (event, payload) => {
   }
 });
 
-// Verrouille/déverrouille le déplacement et le redimensionnement de la fenêtre principale
+// Verrouille/déverrouille le déplacement et le redimensionnement de la fenêtre principale.
+// Verrouillée = toujours visible au-dessus des autres fenêtres.
+// Déverrouillée = se comporte comme une fenêtre normale, peut passer derrière d'autres apps.
 ipcMain.on('set-locked', (event, locked) => {
   win.setMovable(!locked);
   win.setResizable(!locked);
+  win.setAlwaysOnTop(locked);
   saveWindowState();
 });
 
