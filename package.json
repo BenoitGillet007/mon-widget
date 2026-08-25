@@ -1,6 +1,6 @@
 {
   "name": "mon-widget-bureau",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Petit widget de bureau : heure, date, météo, notes, calendrier",
   "main": "main.js",
   "scripts": {

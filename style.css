@@ -74,6 +74,19 @@ html, body {
   color: white;
 }
 
+/* Petite cloche affichée dans la barre du haut uniquement si une alarme est active */
+.alarm-indicator {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-size: 13px;
+}
+.alarm-indicator.active {
+  display: flex;
+}
+
 /* Horloge */
 .clock-section {
   text-align: center;

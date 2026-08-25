@@ -395,6 +395,12 @@ function renderAlarmList() {
   // La zone alarme grandit avec la liste (contrairement à Notes/Calendrier) :
   // on redemande donc la taille à chaque fois que la liste change.
   measureAndResize();
+
+  // Petite cloche dans la barre du haut, visible seulement si au moins une alarme est active
+  document.getElementById('alarmIndicator').classList.toggle(
+    'active',
+    list.some((a) => a.enabled)
+  );
 }
 renderAlarmList();
 
