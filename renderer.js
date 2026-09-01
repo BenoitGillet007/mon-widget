@@ -211,9 +211,78 @@ function stopRinging() {
   window.api.send('stop-flash');
 }
 
+/* ---------- Cadran analogique ---------- */
+// Dessine les 12 graduations du cadran une seule fois au démarrage
+(function drawClockTicks() {
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const ticksGroup = document.getElementById('clockTicks');
+  for (let i = 0; i < 12; i++) {
+    const angle = (i * 30) * (Math.PI / 180);
+    const isMajor = i % 3 === 0; // 12h, 3h, 6h, 9h un peu plus marquées
+    const outerR = 47, innerR = isMajor ? 40 : 43;
+    const x1 = 50 + outerR * Math.sin(angle);
+    const y1 = 50 - outerR * Math.cos(angle);
+    const x2 = 50 + innerR * Math.sin(angle);
+    const y2 = 50 - innerR * Math.cos(angle);
+    const tick = document.createElementNS(svgNS, 'line');
+    tick.setAttribute('x1', x1);
+    tick.setAttribute('y1', y1);
+    tick.setAttribute('x2', x2);
+    tick.setAttribute('y2', y2);
+    tick.setAttribute('class', 'clock-tick' + (isMajor ? ' major' : ''));
+    ticksGroup.appendChild(tick);
+  }
+})();
+
+function updateAnalogClock(now) {
+  const hours = now.getHours() % 12;
+  const minutes = now.getMinutes();
+  const seconds = now.getSeconds();
+
+  const hourDeg = (hours + minutes / 60) * 30;
+  const minuteDeg = (minutes + seconds / 60) * 6;
+  const secondDeg = seconds * 6;
+
+  document.getElementById('hourHand').style.transform = `rotate(${hourDeg}deg)`;
+  document.getElementById('minuteHand').style.transform = `rotate(${minuteDeg}deg)`;
+  document.getElementById('secondHand').style.transform = `rotate(${secondDeg}deg)`;
+}
+
+// Formate l'heure en texte selon le style choisi (24h, 12h avec AM/PM, ou LED qui reprend le format 24h)
+function formatDigitalTime(now, style) {
+  const hh24 = now.getHours();
+  const mm = String(now.getMinutes()).padStart(2, '0');
+  const ss = String(now.getSeconds()).padStart(2, '0');
+
+  if (style === 'digital-12') {
+    const hh12 = hh24 % 12 || 12;
+    const ampm = hh24 >= 12 ? 'PM' : 'AM';
+    return `${String(hh12).padStart(2, '0')}:${mm}:${ss} ${ampm}`;
+  }
+  return `${String(hh24).padStart(2, '0')}:${mm}:${ss}`;
+}
+
+// Applique le style d'horloge choisi dans les réglages (5 styles possibles) :
+// digital-24, digital-12, led (tous les trois textuels) ou analog-classic, analog-minimal (cadran)
+function applyClockStyle() {
+  const style = localStorage.getItem('clockStyle') || 'digital-24';
+  const isAnalog = style.startsWith('analog');
+
+  document.getElementById('clock').style.display = isAnalog ? 'none' : '';
+  document.getElementById('analogClock').style.display = isAnalog ? 'block' : 'none';
+
+  document.getElementById('clock').classList.toggle('led-style', style === 'led');
+  document.getElementById('analogClock').classList.toggle('minimal', style === 'analog-minimal');
+
+  measureAndResize(); // le cadran est plus haut que le texte numérique
+}
+applyClockStyle();
+
 function updateClock() {
   const now = new Date();
-  document.getElementById('clock').textContent = now.toLocaleTimeString('fr-FR');
+  const style = localStorage.getItem('clockStyle') || 'digital-24';
+  document.getElementById('clock').textContent = formatDigitalTime(now, style);
+  updateAnalogClock(now);
   document.getElementById('date').textContent = now.toLocaleDateString('fr-FR', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
   });
@@ -558,6 +627,10 @@ window.api.on('settings-update', (payload) => {
     case 'opacity':
       localStorage.setItem('opacity', payload.value);
       break;
+    case 'clockStyle':
+      localStorage.setItem('clockStyle', payload.value);
+      applyClockStyle();
+      break;
   }
 });
 
@@ -570,5 +643,6 @@ window.api.on('send-current-settings', () => {
     accentColor: localStorage.getItem('accentColor') || '#6c8cff',
     bgColor: localStorage.getItem('bgColor') || '#191c26',
     opacity: localStorage.getItem('opacity') || '1',
+    clockStyle: localStorage.getItem('clockStyle') || 'digital-24',
   });
 });

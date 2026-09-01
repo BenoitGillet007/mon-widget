@@ -44,6 +44,8 @@ window.api.on('current-settings-response', (state) => {
   document.getElementById('checkNotes').checked = state.visibility.notes;
   document.getElementById('checkCalendar').checked = state.visibility.calendar;
   document.getElementById('checkAlarm').checked = state.visibility.alarm;
+
+  document.querySelector(`input[name="clockStyle"][value="${state.clockStyle}"]`).checked = true;
 });
 
 // Demande l'état actuel dès l'ouverture de la fenêtre
@@ -108,4 +110,13 @@ function sendVisibility() {
 
 ['checkClock', 'checkDate', 'checkWeather', 'checkNotes', 'checkCalendar', 'checkAlarm'].forEach(id => {
   document.getElementById(id).addEventListener('change', sendVisibility);
+});
+
+/* ---------- Style de l'horloge (numérique ou cadran) ---------- */
+document.querySelectorAll('input[name="clockStyle"]').forEach((radio) => {
+  radio.addEventListener('change', () => {
+    if (radio.checked) {
+      window.api.send('settings-update', { type: 'clockStyle', value: radio.value });
+    }
+  });
 });

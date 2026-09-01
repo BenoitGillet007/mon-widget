@@ -24,6 +24,14 @@
     <!-- Horloge -->
     <div class="clock-section">
       <div id="clock">--:--:--</div>
+      <svg id="analogClock" class="analog-clock" viewBox="0 0 100 100" style="display:none;">
+        <circle cx="50" cy="50" r="47" class="clock-face" />
+        <g id="clockTicks"></g>
+        <line id="hourHand" class="hand hour-hand" x1="50" y1="50" x2="50" y2="28" />
+        <line id="minuteHand" class="hand minute-hand" x1="50" y1="50" x2="50" y2="16" />
+        <line id="secondHand" class="hand second-hand" x1="50" y1="50" x2="50" y2="12" />
+        <circle cx="50" cy="50" r="2.5" class="clock-center" />
+      </svg>
       <div id="date">--</div>
     </div>
 
