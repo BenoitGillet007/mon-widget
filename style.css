@@ -463,6 +463,8 @@ html, body {
 }
 
 .settings-body {
+  flex: 1;        /* remplit l'espace restant sous la barre de titre */
+  min-height: 0;  /* nécessaire pour que overflow-y:auto fonctionne dans un conteneur flex */
   padding: 16px;
   display: flex;
   flex-direction: column;

@@ -132,7 +132,7 @@ function createSettingsWindow() {
   }
 
   const SETTINGS_WIDTH = 300;
-  const SETTINGS_HEIGHT = 600;
+  const SETTINGS_HEIGHT = 680;
 
   const mainBounds = win.getBounds();
   const display = screen.getDisplayNearestPoint({ x: mainBounds.x, y: mainBounds.y });
