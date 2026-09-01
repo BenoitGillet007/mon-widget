@@ -171,6 +171,16 @@ function createSettingsWindow() {
   settingsWin.on('closed', () => { settingsWin = null; });
 }
 
+// Se déclenche systématiquement AVANT toute fermeture légitime de l'application,
+// y compris quand Windows s'éteint/redémarre et essaie de fermer proprement tous
+// les programmes ouverts. Sans ça, notre gestionnaire de fermeture (qui cache
+// normalement le widget dans le tray au lieu de le fermer) bloquerait cette
+// fermeture, et Windows finirait par tuer le processus de force au bout d'un
+// délai — ce qui provoque un plantage brutal au lieu d'une fermeture propre.
+app.on('before-quit', () => {
+  isQuitting = true;
+});
+
 app.whenReady().then(() => {
   createWindow();
   createTray();
@@ -218,8 +228,12 @@ autoUpdater.on('error', (err) => {
   notifyUpdateStatus('error', 'Erreur de mise à jour');
 });
 
-// Redémarre l'application pour installer la mise à jour téléchargée
+// Redémarre l'application pour installer la mise à jour téléchargée.
+// Important : on autorise ici la fermeture réelle (isQuitting = true), sinon notre
+// gestionnaire de fermeture (qui cache normalement le widget dans le tray au lieu
+// de fermer) empêcherait l'application de se fermer complètement avant l'installation.
 ipcMain.on('install-update', () => {
+  isQuitting = true;
   autoUpdater.quitAndInstall();
 });
 
